@@ -1,13 +1,69 @@
 body, html {
     font-family: "Roboto", sans-serif;
-    background: linear-gradient(to bottom, #87e0fd 0%,#53cbf1 40%,#05abe0 100%);
+    background: aliceblue;
     height: 100%;
 }
 
-.logo {
-    background-image: url('img/corgi-logo.svg');
-    width: 100px;
-    height: 100px;
-    background-repeat: no-repeat;
-    background-size: contain;
+#add-note {
+    height: 40px;
+    width: 90vw;
+    padding:10px 20px;
+    display:flex;
+    align-items: center;
+    #text-input {
+        height: 100%;
+        width: 90%;
+        font-size: 100%;
+        box-sizing: border-box;
+        margin-right: 5px;
+    }
+    #submit-button {
+        height: 100%;
+        padding: 0 40px;
+    }
+}
+
+.note-detail {
+    width: 300px;
+    min-height: 200px;
+    background-color: white;
+    position: relative;
+    padding: 5px 10px;
+    box-shadow: 6px 6px 5px grey;
+    border: 4px double grey;
+    display: flex;
+    flex-direction: column;
+    #title-component {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        .title {
+            font-size: 20px;
+            margin-top: 0px;
+            margin-bottom: 10px;
+        }
+        #button-container {
+            display: inherit;
+            position: absolute;
+            right: 1px;
+            button {
+                font-size: 20px;
+                margin-left: 2px;
+            }
+        }
+    }
+    .text {
+        margin-top: 0px;
+        font-size: 16px;
+    }
+}
+
+#move-note:hover {
+    cursor:move;
+}
+
+textarea {
+    width: 100%; 
+    min-height: 50%;
 }
