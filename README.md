@@ -7,8 +7,8 @@ For lab 3, I used React to create a realtime collaborative notes app.  When user
 
 I used the code provided in the instructions to help structure my own code.  Additionally, the following articles helped me better understand React and Firebase.
 
-<https://reactjs.org/docs/thinking-in-react.html>
-<https://firebase.google.com/docs/database/web/read-and-write>
+* <https://reactjs.org/docs/thinking-in-react.html>
+* <https://firebase.google.com/docs/database/web/read-and-write>
 
 
 __What worked:__
