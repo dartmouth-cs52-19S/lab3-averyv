@@ -2,6 +2,7 @@ body, html {
     font-family: "Roboto", sans-serif;
     background: aliceblue;
     height: 100%;
+    position: relative;
 }
 
 #add-note {
@@ -17,17 +18,14 @@ body, html {
         box-sizing: border-box;
         margin-right: 5px;
     }
-    #submit-button {
+    button {
         height: 100%;
         padding: 0 40px;
     }
 }
 
-.note-detail {
-    width: 300px;
-    min-height: 200px;
+.note-detail.react-draggable {
     background-color: white;
-    position: relative;
     padding: 5px 10px;
     box-shadow: 6px 6px 5px grey;
     border: 4px double grey;
@@ -42,6 +40,7 @@ body, html {
             font-size: 20px;
             margin-top: 0px;
             margin-bottom: 10px;
+            width: 50%;
         }
         #button-container {
             display: inherit;
@@ -50,6 +49,15 @@ body, html {
             button {
                 font-size: 20px;
                 margin-left: 2px;
+                background: none;
+                border: none;
+                /*
+                Inspired by https://stackoverflow.com/questions/20340138/remove-blue-border-from-css-custom-styled-button-in-chrome
+                This method removes the default blue line that surrounds an HTML <button> when it is active
+                */
+                &:focus {
+                    outline: 0;
+                }
             }
         }
     }
@@ -59,6 +67,10 @@ body, html {
     }
 }
 
+.note-body {
+    overflow: scroll;
+}
+
 #move-note:hover {
     cursor:move;
 }
@@ -66,4 +78,34 @@ body, html {
 textarea {
     width: 100%; 
     min-height: 50%;
+}
+
+.star-button {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    text-align: right;
+    font-size: 16px;
+    width:99%;
+    border:none;
+    height: 10%;
+    &:focus {
+        outline: 0;
+    }
+}
+
+// Style the bottom container red if the note is starred
+#starred-container {
+    background: red;
+    .far, .fa-star {
+        color: black;
+    }
+}
+
+// Style the bottom container red if the note is not starred
+#not-starred-container {
+    background: white;
+    .far, .fa-star {
+        color: gold;
+    }
 }

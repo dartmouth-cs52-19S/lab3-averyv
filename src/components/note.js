@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import Draggable from 'react-draggable';
+import Resizable from 're-resizable';
 import marked from 'marked';
 
-let maxIndex = 0;
+// maxZIndex will be used to deal with zIndex sorting when dragging a note
+let maxZIndex = 0;
+
 class Note extends Component {
   constructor(props) {
     super(props);
@@ -12,16 +15,15 @@ class Note extends Component {
     this.onDeleteClick = this.onDeleteClick.bind(this);
     this.onTitleChange = this.onTitleChange.bind(this);
     this.onTextChange = this.onTextChange.bind(this);
-    this.renderTitle = this.renderTitle.bind(this);
-    this.renderText = this.renderText.bind(this);
-    this.toggleEditing = this.toggleEditing.bind(this);
+    this.onStartDrag = this.onStartDrag.bind(this);
     this.onDrag = this.onDrag.bind(this);
-    this.renderEditButton = this.renderEditButton.bind(this);
+    this.onResizeStop = this.onResizeStop.bind(this);
+    this.toggleStarred = this.toggleStarred.bind(this);
+    this.toggleEditing = this.toggleEditing.bind(this);
   }
 
-  onDeleteClick(event) {
-    event.preventDefault();
-    this.props.delete(this.props.id);
+  onDeleteClick() {
+    this.props.onDelete(this.props.id);
   }
 
   onTitleChange(event) {
@@ -32,16 +34,53 @@ class Note extends Component {
     this.props.onUpdate(this.props.id, { text: event.target.value });
   }
 
-  onDrag(e, ui) {
-    maxIndex += 1;
-    this.props.onUpdate(this.props.id, { x: ui.x, y: ui.y, zIndex: maxIndex });
+  // onStartDrag pops a note to the front when it is dragged
+  onStartDrag() {
+    maxZIndex += 1;
+    this.props.onUpdate(this.props.id, { zIndex: maxZIndex });
   }
 
+  onDrag(e, ui) {
+    maxZIndex += 1;
+    this.props.onUpdate(this.props.id, { x: ui.x, y: ui.y });
+  }
+
+  onResizeStop(e, direction, ref, d) {
+    this.props.onUpdate(this.props.id, { width: this.props.note.width + d.width, height: this.props.note.height + d.height });
+  }
+
+  // toggleStarred toggles whether or not a note should be starred
+  toggleStarred(event) {
+    if (this.props.note.starred) {
+      this.props.onUpdate(this.props.id, { starred: false });
+    } else {
+      this.props.onUpdate(this.props.id, { starred: true });
+    }
+  }
+
+  /*
+  This method toggles the isEditing state of a particular note, which will be used to render
+  different elements based on whether or note the note is currently being edited.
+  I looked at https://stackoverflow.com/questions/40359800/how-to-toggle-boolean-state-of-react-component to
+  figure out how to toggle the boolean state of a React component
+  */
   toggleEditing() {
-    /* https://stackoverflow.com/questions/40359800/how-to-toggle-boolean-state-of-react-component */
     this.setState(prevState => ({ isEditing: !prevState.isEditing }));
   }
 
+  renderStarred() {
+    if (this.props.note.starred) {
+      return (
+        <button className="star-button" id="starred-container" type="button" onClick={this.toggleStarred}><i className="far fa-star" /></button>
+      );
+    } else {
+      return (
+        <button className="star-button" id="not-starred-container" type="button" onClick={this.toggleStarred}><i className="far fa-star" /></button>
+      );
+    }
+  }
+
+  // The following three render methods return different JSX based on whether a note is currently being edited
   renderTitle() {
     if (this.state.isEditing) {
       return (
@@ -69,16 +108,26 @@ class Note extends Component {
   renderText() {
     if (this.state.isEditing) {
       return (
-        <TextareaAutosize className="text" value={this.props.note.text} onChange={this.onTextChange} />
+        /*
+        I looked at the documentation of TextareaAutosize (at https://github.com/andreypopp/react-textarea-autosize)
+         to better understand how to implement this component
+        */
+        <TextareaAutosize className="note-body text" value={this.props.note.text} onChange={this.onTextChange} />
       );
     } else {
       return (
         // eslint-disable-next-line react/no-danger
-        <div className="noteBody" dangerouslySetInnerHTML={{ __html: marked(this.props.note.text || '') }} />
+        <div className="note-body" dangerouslySetInnerHTML={{ __html: marked(this.props.note.text || '') }} />
       );
     }
   }
 
+  /*
+  To understand how to implement a draggable note, I looked at the code provided in the instructions, as well as
+  the react-draggable documentation at https://github.com/mzabriskie/react-draggable.
+  To make the note resizable, I looked at the documentation and example code for re-resizable at
+  https://github.com/bokuweb/re-resizable.
+  */
   render() {
     return (
       <Draggable
@@ -88,9 +137,19 @@ class Note extends Component {
         position={{ x: this.props.note.x, y: this.props.note.y }}
         onStart={this.onStartDrag}
         onDrag={this.onDrag}
-        onStop={this.onStopDrag}
       >
-        <div id={this.props.id} className="note-detail" style={{ zIndex: this.props.note.zIndex }}>
+        <Resizable
+          className="note-detail"
+          id={this.props.id}
+          style={{ zIndex: this.props.note.zIndex, position: 'absolute' }}
+          size={{ width: this.props.note.width, height: this.props.note.height }}
+          minWidth={250}
+          minHeight={200}
+          enable={{
+            top: false, right: true, bottom: true, left: false, topRight: false, bottomRight: true, bottomLeft: false,
+          }}
+          onResizeStop={this.onResizeStop}
+        >
           <div id="title-component">
             {this.renderTitle()}
             <div id="button-container">
@@ -100,7 +159,8 @@ class Note extends Component {
             </div>
           </div>
           {this.renderText()}
-        </div>
+          {this.renderStarred()}
+        </Resizable>
       </Draggable>
     );
   }

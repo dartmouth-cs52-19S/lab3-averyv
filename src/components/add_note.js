@@ -7,18 +7,20 @@ class AddNote extends Component {
     this.state = { title: '' };
     this.onInputChange = this.onInputChange.bind(this);
     this.onNoteAdd = this.onNoteAdd.bind(this);
+    this.onDelete = this.onDelete.bind(this);
   }
 
   onInputChange(event) {
-    // eslint-disable-next-line spaced-comment
-    /*this.props.onSearchChange(event.target.value); */
     this.setState({ title: event.target.value });
   }
 
-  onNoteAdd(event) {
-    event.preventDefault();
+  onNoteAdd() {
     this.props.onSubmit(this.state.title);
     this.setState({ title: '' });
+  }
+
+  onDelete() {
+    this.props.onDelete();
   }
 
   render() {
@@ -26,6 +28,7 @@ class AddNote extends Component {
       <form id="add-note">
         <input id="text-input" placeholder="Start typing to add a note..." type="text" onChange={this.onInputChange} value={this.state.title} />
         <button id="submit-button" type="button" onClick={this.onNoteAdd}>Submit</button>
+        <button id="delete-button" type="button" onClick={this.onDelete}>Clear All</button>
       </form>
     );
   }

@@ -4,8 +4,8 @@ import './style.scss';
 import { Map } from 'immutable';
 import AddNote from './components/add_note';
 import Note from './components/note';
+import * as db from './services/datastore';
 
-let noteId = 0;
 class App extends Component {
   constructor(props) {
     super(props);
@@ -13,44 +13,40 @@ class App extends Component {
       // eslint-disable-next-line new-cap
       notes: Map(),
     };
-    this.addNewNote = this.addNewNote.bind(this);
-    this.updateNote = this.updateNote.bind(this);
   }
 
-  addNewNote = (term) => {
-    noteId += 1;
-    // eslint-disable-next-line prefer-const
-    let newNote = {
-      title: term, text: '', x: 0, y: 0, zIndex: 0,
-    };
-    this.setState(prevState => ({
-      notes: prevState.notes.set(noteId, newNote),
-    }));
+  componentDidMount(callback) {
+    db.fetchNotes((notes) => {
+      // eslint-disable-next-line new-cap
+      this.setState({ notes: Map(notes) });
+    });
+  }
+
+  addNote = (term) => {
+    db.addNote(term);
   }
 
   updateNote = (id, fields) => {
-    this.setState(prevState => ({
-      notes: prevState.notes.update(id, (n) => { return Object.assign({}, n, fields); }),
-    }));
+    db.updateNote(id, fields);
   }
 
   deleteNote = (id) => {
-    this.setState(prevState => ({
-      notes: prevState.notes.delete(id),
-    }));
+    db.deleteNote(id);
+  }
+
+  deleteAll = () => {
+    db.deleteAllNotes();
   }
 
   render() {
     return (
       <div id="full-page">
-        <AddNote onSubmit={this.addNewNote} />
-        <div id="note-component">
-          {this.state.notes.entrySeq().map(([id, note]) => {
-            return (
-              <Note id={id} note={note} delete={this.deleteNote} onUpdate={this.updateNote} />
-            );
-          })}
-        </div>
+        <AddNote onSubmit={this.addNote} onDelete={this.deleteAll} />
+        {this.state.notes.entrySeq().map(([id, note]) => {
+          return (
+            <Note key={id} id={id} note={note} onDelete={this.deleteNote} onUpdate={this.updateNote} />
+          );
+        })}
       </div>
     );
   }
